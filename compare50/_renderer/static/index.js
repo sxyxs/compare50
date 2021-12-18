@@ -17,8 +17,9 @@ var G_LINK = null;
 var NODE_DATA = GRAPH.nodes;
 var LINK_DATA = GRAPH.links;
 
-var COLOR = null;
 
+var COLOR = null;
+var same = []
 // When there are exactly two nodes in the graph, d3 sets all kinds of things to
 // NaN for an unknown reason
 // This bool exists to mark all the places in the code where we implement the hack to fix this issue.
@@ -50,10 +51,11 @@ function init_data() {
     // assign groups to nodes
     let group_map = get_group_map(GRAPH.links.map(d => ({source:d.source.id, target:d.target.id})));
     GRAPH.nodes.forEach(d => d.group = group_map[d.id]);
-
+    console.log(group_map)
     // set COLOR (function from group => color)
     let n_groups = Math.max.apply(0, GRAPH.nodes.map(node => node.group));
     COLOR = d3.scaleSequential().domain([0, n_groups + 1]).interpolator(d3.interpolateRainbow);
+    console.log(GRAPH)
 }
 
 function init_graph() {
@@ -108,10 +110,10 @@ function init_graph() {
 
 
     // scale graph and slider
-    on_resize();
+    //on_resize();
 
     // add data to graph
-    update_graph();
+    //update_graph();
 
     let choseX = d3.randomUniform(WIDTH / 4, 3 * WIDTH / 4);
     let choseY = d3.randomUniform(HEIGHT / 4, 3 * HEIGHT / 4);
@@ -132,7 +134,7 @@ function init_graph() {
 }
 
 
-function init_index() {
+function init_index() { //创建一个表格，有#	Submissions	Score 作为title，里面没填东西但是架子搭起来了，靠update_index填数据
     let table = d3.select("div#index").append("table")
         .attr("class", "table table-hover w-100")
         .attr("id", "results");
@@ -343,31 +345,45 @@ function cutoff(n) {
 
 
 function update() {
+    console.log("in")
     update_index();
-    update_graph();
+    //update_graph();
 }
 
 
 function update_index() {
+    var count = 0;
     let table_data = INDEX.selectAll("tr").data(LINK_DATA, d => d.index);
-
+    console.log("asdiouashdisahosahdosahuds")
+    console.log(LINK_DATA.length) //21
+    console.log(LINK_DATA[0].source.id)
+    console.log(GRAPH.data)
+    console.log("asdasd")
+    const aaa = []
     let new_trs = table_data.enter().append("tr");
 
     new_trs.append("th")
         .attr("scope", "row")
-        .text(d => d.index + 1);
-
+        //.text(d => d.index + 1); //井号下面的数字1-21
+        .datum(d => d.source)
+            //.datum(d => d.source, d => d.target)
+        .html(d => GRAPH.data[d.id].is_archive ? `${ARCHIVE_IMG} ${d.id}` : d.id);
     for (let field of ["source", "target"]) {
+        console.log("count the num"+count+field)
+        count = count+1
         new_trs.append("td")
             .attr("class", "sub_name")
             .datum(d => d[field])
+            //aaa.push()
+            //console.log(aaa)
+            //.datum(d => d.source, d => d.target)
             .html(d => GRAPH.data[d.id].is_archive ? `${ARCHIVE_IMG} ${d.id}` : d.id);
-    }
+    } //这个生成的是文件路径
 
     new_trs.append("td")
         .attr("class", "score")
-        .text(d => d.value.toFixed(1))
-        .style("border-right", d => d.source.group === undefined ? "" : `10px solid ${COLOR(d.source.group)}`);
+        .text(d => d.value.toFixed(1));//toFixed(1)保留一位小数
+        //.style("border-right", d => d.source.group === undefined ? "" : `10px solid ${COLOR(d.source.group)}`);//重复的分数
 
 
     new_trs
@@ -376,14 +392,14 @@ function update_index() {
                 node.is_node_in_splotlight = node.id === link.source.id || node.id === link.target.id;
                 node.is_node_in_background = node.group !== link.source.group;
             });
-            update_graph();
+           // update_graph();
         })
         .on("mouseout", link => {
             GRAPH.nodes.forEach(node => {
                 node.is_node_in_splotlight = false;
                 node.is_node_in_background = false;
             })
-            update_graph();
+           // update_graph();
        })
        .on("click", d => window.open(`match_${d.index + 1}.html`));
 
@@ -498,7 +514,7 @@ document.addEventListener("DOMContentLoaded", event => {
 
     init_data();
     init_index();
-    init_graph();
+    //init_graph();
     if (HORRIBLE_TWO_NODE_HACK) cutoff(0);
     jiggle();
 });

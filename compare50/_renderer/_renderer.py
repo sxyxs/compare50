@@ -70,11 +70,15 @@ class HTMLSubmission:
 
 def render(pass_to_results, dest):
     bar = _api.get_progress_bar()
+    #pathlib 是Python内置库，Python 文档给它的定义是Object-oriented filesystem paths（面向对象的文件系统路径）。 
+    #pathlib 提供表示文件系统路径的类，其语义适用于不同的操作系统
     dest = pathlib.Path(dest)
-
+    #print(pass_to_results.values(),"<-dest")# result <-dest
     sub_pair_to_results = collections.defaultdict(list)
     for results in pass_to_results.values():
+        #print(len(results),"\n") #会出来3个21
         for result in results:
+            #print(result,"\n")
             sub_pair_to_results[(result.sub_a, result.sub_b)].append(result)
 
     bar.reset(total=len(sub_pair_to_results) + 1)
@@ -85,11 +89,14 @@ def render(pass_to_results, dest):
     common_css = [read_file(STATIC / f) for f in  ("bootstrap.min.css", "fonts.css")]
     match_css = common_css + [read_file(STATIC / "match.css")]
     match_js = [read_file(STATIC / f) for f in ("split.min.js", "match.js")]
+    
     # Render all matches
     with _api.Executor() as executor:
         # Load static files
         max_id = len(results_per_sub_pair)
+        #print(max_id)
         for id, html in executor.map(_RenderTask(dest, max_id, match_js, match_css), enumerate(results_per_sub_pair, 1)):
+            #print(html)
             with open(dest / f"match_{id}.html", "w") as f:
                 f.write(html)
             bar.update()
@@ -99,38 +106,46 @@ def render(pass_to_results, dest):
     with open(TEMPLATES / "index.html") as f:
         index_template = jinja2.Template(
             f.read(), autoescape=jinja2.select_autoescape(enabled_extensions=("html",)))
-
+    #print(index_template)
     ranking_pass, ranking_results = next(iter(pass_to_results.items()))
-
+    #ranking_pass -> <class 'compare50.passes.structure'>
+    #print(ranking_results,"<-ranking_results")
 
     try:
         max_score = max((result.score.score for result in ranking_results))
     except ValueError:
         max_score = 0
-
+    #print(max_score)#34.40797540564806
     # Generate cluster data
     subs = set()
     graph_info = {"nodes": [], "links": [], "data": {}}
     for i, result in enumerate(ranking_results):
-        graph_info["links"].append({"index":i, "source": str(result.sub_a.path), "target": str(result.sub_b.path), "value": 10 * result.score.score/max_score})
+        graph_info["links"].append({"index":i, "source": str(result.sub_a.path)+'/'+str(result.sub_a.files[0].name), "target": str(result.sub_b.path)+'/'+str(result.sub_b.files[0].name), "value": 10 * result.score.score/max_score})
+        #print(result.sub_a.file,"\n")
         subs.add(result.sub_a)
         subs.add(result.sub_b)
-
+    #print(graph_info,"<-graph_info")
+    print(subs,"<-subs")
     for sub in subs:
-        graph_info["nodes"].append({"id": str(sub.path)})
-        graph_info["data"][str(sub.path)] = {"is_archive": sub.is_archive}
-
+        graph_info["nodes"].append({"id": str(sub.path)+'/'+str(sub.files[0].name)})
+        graph_info["data"][str(sub.path)+'/'+str(sub.files[0].name)] = {"is_archive": sub.is_archive}
+    #print(graph_info)
+    #print(graph_info,"<-graph info")
     index_css = common_css + [read_file(STATIC / "index.css")]
     index_js = [read_file(STATIC / f) for f in ("d3.v4.min.js", "d3-scale-chromatic.v1.min.js", "d3-simple-slider.js", "index.js")]
+    #index_css -> 一坨乱码 index_js -> 正常代码
+    #STATIC ->/Users/xiangyushi/Desktop/compare50/fork_cp50/compare50/compare50/_renderer/static
+
     # Render index
-    rendered_index = index_template.render(js=index_js,
-                                           css=index_css,
-                                           graph_info=graph_info,
-                                           dest=dest.resolve())
+    # js will show the node in html, css will be the structure of the html 
+    rendered_index = index_template.render(js=index_js,css=index_css,graph_info=graph_info,dest=dest.resolve())
+
+    #print(rendered_index)
     with open(dest / "index.html", "w") as f:
         f.write(rendered_index)
 
     bar.update()
+    
     return dest / "index.html"
 
 

@@ -369,6 +369,7 @@ def main():
     # Extract comparator and preprocessors from pass
     try:
         passes = [_data.Pass._get(pass_) for pass_ in args.passes]
+        print(passes[0])
     except KeyError as e:
         raise _api.Error("{} is not a pass, try one of these: {}"
                            .format(e.args[0], [c.__name__ for c in _data.Pass._get_all()]))
@@ -383,7 +384,7 @@ def main():
 
     if args.debug:
         _api.Executor = _api.FauxExecutor
-
+    # 如果已经做过至少一次的查重，问下要不要覆盖以前的结果html页面
     if args.output.exists():
         try:
             resp = input(f"File path {termcolor.colored(args.output, None, attrs=['underline'])}"
@@ -402,16 +403,19 @@ def main():
             sys.exit(1)
 
     with profiler():
-        total = len(args.submissions) + len(args.archive) + len(args.distro)
+        total = len(args.submissions) + len(args.archive) + len(args.distro) 
+        # args.submissions -> ['6.cpp', '7.cpp'] ->['tests/files/sub_a/1.cpp', 'tests/files/sub_a/2.cpp']
+        # args.archive -> []
+        #args.distro -> []
+        
         with _api.progress_bar("Preparing", total=total, disable=args.debug) as bar:
             # Collect all submissions, archive submissions and distro files
             subs = submission_factory.get_all(args.submissions, preprocessor)
             archive_subs = submission_factory.get_all(args.archive, preprocessor, is_archive=True)
             ignored_subs = submission_factory.get_all(args.distro, preprocessor)
             ignored_files = {f for sub in ignored_subs for f in sub.files}
-
         print_stats(subs, archive_subs, ignored_subs, ignored_files, verbose=bool(args.verbose))
-
+        
         # Remove any empty submissions
         subs = [sub for sub in subs if sub.files]
         archive_subs = [archive for archive in archive_subs if archive.files]
@@ -422,13 +426,21 @@ def main():
 
         with _api.progress_bar(f"Scoring ({passes[0].__name__})", disable=args.debug) as bar:
             # Cross compare and rank all submissions, keep only top `n`
-            scores = _api.rank(subs, archive_subs, ignored_files, passes[0], n=args.n)
-
+            #passes -> [<class 'compare50.passes.structure'>, <class 'compare50.passes.text'>, <class 'compare50.passes.exact'>]
+            scores = _api.rank(subs, archive_subs, ignored_files, passes[0])
+        
         # If ranking produced no scores, there are no matches, stop
         if not scores:
             termcolor.cprint(f"Done, no similarities found.", "yellow")
             return
 
+        #scoures是有重复的文件的对照名字。
+        #Score(sub_a=Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('1.cpp'), submission=..., id=0),), 
+        # is_archive=False, id=0), sub_b=Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('7.cpp'), submission=..., id=6),), is_archive=False, id=6), score=28.407975405648056) 
+        #for a in scores:
+            #print("suba",a.sub_a.path,"sub b",a.sub_b,"\n")
+            #print(a.sub_a.files.name,"\n")
+        #print(len(scores))
         # Get the matching spans, group them per submission
         groups = []
         pass_to_results = {}
@@ -436,13 +448,22 @@ def main():
             with _api.progress_bar(f"Comparing ({pass_.__name__})", disable=args.debug):
                 preprocessor = _data.Preprocessor(pass_.preprocessors)
                 for sub in itertools.chain(subs, archive_subs, ignored_subs):
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('6.cpp'), submission=..., id=5),), is_archive=False, id=5) <-- sub
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('5.cpp'), submission=..., id=4),), is_archive=False, id=4) <-- sub
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('2.cpp'), submission=..., id=1),), is_archive=False, id=1) <-- sub
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('1.cpp'), submission=..., id=0),), is_archive=False, id=0) <-- sub
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('7.cpp'), submission=..., id=6),), is_archive=False, id=6) <-- sub
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('4.cpp'), submission=..., id=3),), is_archive=False, id=3) <-- sub
+                    #Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('3.cpp'), submission=..., id=2),), is_archive=False, id=2) <-- sub
                     object.__setattr__(sub, "preprocessor", preprocessor)
                 pass_to_results[pass_] = _api.compare(scores, ignored_files, pass_)
-
+        #pass_to_results is the compare result sor each lines
+        #print(pass_to_results)
+        #[<class 'compare50.passes.structure'>, <class 'compare50.passes.text'>, <class 'compare50.passes.exact'>] <- passes
         # Render results
         with _api.progress_bar("Rendering", disable=args.debug):
             index = _renderer.render(pass_to_results, dest=args.output)
-
+        #args.output -> result
     termcolor.cprint(
         f"Done! Visit file://{index.absolute()} in a web browser to see the results.", "green")
 

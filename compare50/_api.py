@@ -20,7 +20,7 @@ class Error(Exception):
     pass
 
 
-def rank(submissions, archive_submissions, ignored_files, pass_, n=50):
+def rank(submissions, archive_submissions, ignored_files, pass_):
     """
     :param submissions: submissions to be ranked
     :type submissions: [:class:`compare50.Submission`]
@@ -40,7 +40,8 @@ def rank(submissions, archive_submissions, ignored_files, pass_, n=50):
     """
     scores = pass_.comparator.score(submissions, archive_submissions, ignored_files)
     # Keep only top `n` submission matches
-    return heapq.nlargest(n, scores)
+    return heapq.nlargest(10, scores)
+    return scores
 
     # max_id = max((max(score.sub_a.id, score.sub_b.id) for score in scores))
     # matrix = np.zeros((max_id+1, max_id+1))
@@ -71,15 +72,18 @@ def compare(scores, ignored_files, pass_):
     missing_spans_cache = {}
     sub_match_to_ignored_spans = {}
     sub_match_to_groups = {}
-
+    #print(pass_.comparator.compare(scores, ignored_files))
     for comparison in pass_.comparator.compare(scores, ignored_files):
         new_ignored_spans = []
+        
         for sub in (comparison.sub_a, comparison.sub_b):
+            #sub -> n * Submission(path=PosixPath('tests/files/sub_a'), files=(File(name=PosixPath('6.cpp'), submission=..., id=5),), is_archive=False, id=5) <-- sub
+            #sub.files -> n * (File(name=PosixPath('2.cpp'), submission=Submission(path=PosixPath('tests/files/sub_a'), files=(...), is_archive=False, id=1), id=1),) <-- files
             for file in sub.files:
                 # Divide ignored_spans per file
                 ignored_spans_file = [span for span in comparison.ignored_spans
                                            if span.file == file]
-
+                #print(ignored_spans_file)
                 # Find all spans lost by preprocessors for file_a
                 if file not in missing_spans_cache:
                     missing_spans_cache[file] = missing_spans(file)
@@ -89,10 +93,11 @@ def compare(scores, ignored_files, pass_):
                 new_ignored_spans += _flatten_spans(ignored_spans_file)
 
         sub_match_to_ignored_spans[(comparison.sub_a, comparison.sub_b)] = new_ignored_spans
-
+        #print(new_ignored_spans)
         sub_match_to_groups[(comparison.sub_a, comparison.sub_b)] = _group_span_matches(comparison.span_matches)
 
     results = []
+
     for score in scores:
         sub_match = (score.sub_a, score.sub_b)
         results.append(Compare50Result(pass_,
