@@ -478,7 +478,10 @@ function count1(arr, val) {
 function update_index() {
     var count = 0;
     var count1 = 0;
+    var count2 = 0
+    var count_single_source = 0
     let table_data = INDEX.selectAll("tr").data(LINK_DATA, d => d.index);
+    console.log(typeof GRAPH.data)
     /* console.log("asdiouashdisahosahdosahuds")
      console.log(LINK_DATA.length) //21
      console.log( LINK_DATA[0].source.id)
@@ -487,56 +490,62 @@ function update_index() {
      console.log("asdasd")*/
     var tar = new Array()
     var sor = new Array()
+    var single_source = new Array()
     var length = LINK_DATA.length
     var i = 0
+    var j = 0
     const countOccurences = (arr, value) => arr.reduce((a, v) => v === value ? a + 1 : a + 0, 0);
-    //change iplus to false , uncomment all replace
+
+    var rray = new Array()
     while (i < length) {
-        var i_plus = true
-        // if(tar.indexOf(LINK_DATA[i].target.id) == -1){
-        tar[count] = LINK_DATA[i].target.id
+        if (rray.indexOf(LINK_DATA[i].source.id) == -1) {
+            rray[count2] = LINK_DATA[i].source.id
+            single_source[count_single_source] = LINK_DATA[i].source.id
+            count_single_source += 1
+            count2 += 1
+        }
+        if (rray.indexOf(LINK_DATA[i].target.id) == -1) {
+            rray[count2] = LINK_DATA[i].target.id
+            count2 += 1
+        }
+        sor[count] = LINK_DATA[i].source.id
         count += 1
-        //}
-
-        // if(sor.indexOf(LINK_DATA[i].source.id) == -1){
-        sor[count1] = LINK_DATA[i].source.id
+        tar[count] = LINK_DATA[i].target.id
         count1 += 1
-        //  }
-
-        //console.log("tar  " + tar + "   current source id  " + LINK_DATA[i].source.id + "   current target id  " + LINK_DATA[i].target.id + "     index  " + i)
-        //if((tar.indexOf(LINK_DATA[i].source.id) !== -1)){
-        if (countOccurences(tar, LINK_DATA[i].source.id) > 1) {
-            //LINK_DATA.splice(i, 1)
-            //length = length - 1
-        }
-        //else if(tar.indexOf(LINK_DATA[i].target.id) !== -1){
-        /*else */
-        /*else if(sor.indexOf(LINK_DATA[i].target.id) !== -1){
-            console.log("successful2 ")
+        var i_plus = false
+        if (countOccurences(tar, LINK_DATA[i].source.id) > 1 || countOccurences(sor, LINK_DATA[i].target.id) > 1) {
             LINK_DATA.splice(i, 1)
-            length = length -1
-        }*/
-        else {
-            //i += 1
-            i_plus = true
-        }
-        if (countOccurences(tar, LINK_DATA[i].target.id) > 1) {
-            //console.log("successful2 ")
-            //console.log("tar  " + tar + "   current source id  " + LINK_DATA[i].source.id + "   current target id  " + LINK_DATA[i].target.id + "     index  " + i)
-            //LINK_DATA.splice(i, 1)
-            //length = length - 1
+            length = length - 1
         }
         else {
-            //i += 1
-            i_plus = true
-        }
-        if(i_plus==true){
-            i+=1
+            //i_plus = true
+            i += 1
         }
     }
 
-    var ignore_array = new Array()
-   
+    /*ar objectB = new Object()
+    var count_objb = 0
+    
+    for (j = 0; i < rray.length; j++) {
+        if (single_source.indexOf(rray[j]) !== -1) {
+            for (i = 0; i < length; i++) {
+                if(LINK_DATA[i].source.id==rray[j]){
+                    //objectB[count_objb] = LINK_DATA[i]
+                    objectB = Object.assign(objectB, LINK_DATA[i])
+                    console.log(objectB)
+                    count_objb+=1
+                }
+                
+            }
+        }
+    }
+    console.log("aspdhasdhas")
+    console.log(count_objb)*/
+    //LINK_DATA.push(LINK_DATA[0])
+    LINK_DATA.splice(6, 0,LINK_DATA[0])
+    // 写一个for loop 从 single source里抓
+    // 
+    //LINK_DATA.splice(0, 1)
     const aaa = []
     let new_trs = table_data.enter().append("tr");
 
