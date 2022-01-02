@@ -40,7 +40,8 @@ def rank(submissions, archive_submissions, ignored_files, pass_):
     """
     scores = pass_.comparator.score(submissions, archive_submissions, ignored_files)
     # Keep only top `n` submission matches
-    return heapq.nlargest(10, scores)
+
+    return heapq.nlargest(len(scores), scores)
     return scores
 
     # max_id = max((max(score.sub_a.id, score.sub_b.id) for score in scores))

@@ -125,12 +125,12 @@ def render(pass_to_results, dest):
         subs.add(result.sub_a)
         subs.add(result.sub_b)
     #print(graph_info,"<-graph_info")
-    print(subs,"<-subs")
+    print(len(subs),"<-subs")
     for sub in subs:
         graph_info["nodes"].append({"id": str(sub.path)+'/'+str(sub.files[0].name)})
         graph_info["data"][str(sub.path)+'/'+str(sub.files[0].name)] = {"is_archive": sub.is_archive}
     #print(graph_info)
-    #print(graph_info,"<-graph info")
+    print(graph_info,"<-graph info")
     index_css = common_css + [read_file(STATIC / "index.css")]
     index_js = [read_file(STATIC / f) for f in ("d3.v4.min.js", "d3-scale-chromatic.v1.min.js", "d3-simple-slider.js", "index.js")]
     #index_css -> 一坨乱码 index_js -> 正常代码

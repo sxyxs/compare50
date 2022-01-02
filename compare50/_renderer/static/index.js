@@ -29,9 +29,9 @@ function init_data() {
     if (HORRIBLE_TWO_NODE_HACK) {
         /// When there are exactly two nodes, add an additional one with an id of "" and an edge with value -1
         if (GRAPH.nodes.length == 2) {
-            GRAPH.nodes.push({id: ""});
-            GRAPH.links.push({source: GRAPH.nodes[0], target: "", value: -1});
-            GRAPH.data[""] = {is_archive: false};
+            GRAPH.nodes.push({ id: "" });
+            GRAPH.links.push({ source: GRAPH.nodes[0], target: "", value: -1 });
+            GRAPH.data[""] = { is_archive: false };
         }
     }
 
@@ -49,7 +49,7 @@ function init_data() {
 
 
     // assign groups to nodes
-    let group_map = get_group_map(GRAPH.links.map(d => ({source:d.source.id, target:d.target.id})));
+    let group_map = get_group_map(GRAPH.links.map(d => ({ source: d.source.id, target: d.target.id })));
     GRAPH.nodes.forEach(d => d.group = group_map[d.id]);
     console.log(group_map)
     // set COLOR (function from group => color)
@@ -92,15 +92,15 @@ function init_graph() {
         .on("onchange", cutoff)
         .handle(
             d3
-              .symbol()
-              .type(d3.symbolCircle)
-              .size(200)()
+                .symbol()
+                .type(d3.symbolCircle)
+                .size(200)()
         );
     d3.select("div#slider")
-      .append("svg")
+        .append("svg")
         .attr("height", 100)
         .attr("class", "mx-auto d-block")
-      .append("g")
+        .append("g")
         .attr("transform", "translate(30,30)");
 
     G_LINK = SVG.append("g").attr("class", "links");
@@ -128,7 +128,7 @@ function init_graph() {
     });
 
     SIMULATION.force("x", d3.forceX(d => pos_map[d.group].x).strength(0.2))
-              .force("y", d3.forceY(d => pos_map[d.group].y).strength(0.2));
+        .force("y", d3.forceY(d => pos_map[d.group].y).strength(0.2));
 
     setTimeout(() => SIMULATION.force("x", null).force("y", null), 300);
 }
@@ -166,20 +166,20 @@ function on_resize() {
 
     SLIDER.width(Math.floor(0.8 * WIDTH) - 60);
     d3.select("div#slider")
-      .attr("width", WIDTH)
+        .attr("width", WIDTH)
         .select("svg")
-          .attr("width", Math.floor(0.8 * WIDTH))
+        .attr("width", Math.floor(0.8 * WIDTH))
 
     d3.select("div#slider")
-      .attr("width", WIDTH)
-      .select("svg")
+        .attr("width", WIDTH)
+        .select("svg")
         .attr("width", Math.floor(0.8 * WIDTH))
         .select("g")
-          .call(SLIDER);
+        .call(SLIDER);
 
     HEIGHT = window.innerHeight - document.getElementById("title").clientHeight
-                                - document.getElementById("slider").clientHeight
-                                - header_size;
+        - document.getElementById("slider").clientHeight
+        - header_size;
 
     SVG.attr("width", WIDTH).attr("height", HEIGHT);
 
@@ -195,14 +195,14 @@ function get_real_width(elem) {
 
 function ticked(links, nodes) {
     nodes
-        .attr("x", function(d) { return d.x = Math.max(RADIUS, Math.min(WIDTH - RADIUS * 3, d.x)); })
-        .attr("y", function(d) { return d.y = Math.max(RADIUS, Math.min(HEIGHT - RADIUS * 3, d.y)); });
+        .attr("x", function (d) { return d.x = Math.max(RADIUS, Math.min(WIDTH - RADIUS * 3, d.x)); })
+        .attr("y", function (d) { return d.y = Math.max(RADIUS, Math.min(HEIGHT - RADIUS * 3, d.y)); });
 
     links
-        .attr("x1", function(d) { return d.source.x + RADIUS; })
-        .attr("y1", function(d) { return d.source.y + RADIUS; })
-        .attr("x2", function(d) { return d.target.x + RADIUS; })
-        .attr("y2", function(d) { return d.target.y + RADIUS; });
+        .attr("x1", function (d) { return d.source.x + RADIUS; })
+        .attr("y1", function (d) { return d.source.y + RADIUS; })
+        .attr("x2", function (d) { return d.target.x + RADIUS; })
+        .attr("y2", function (d) { return d.target.y + RADIUS; });
 }
 
 
@@ -237,7 +237,7 @@ function dragended(d) {
 
 function on_mouseover_node(d) {
     if (DRAG_TARGET !== null) {
-      return;
+        return;
     }
 
     GRAPH.nodes.forEach(node => {
@@ -349,16 +349,79 @@ function update() {
     update_index();
     //update_graph();
 }
+function count1(arr, val) {
+    var j = 0
+    var count = 0
+    for (j = 0; i < arr.length; j++) {
+        if (val == arr[j]) {
+            count += 1
+        }
+    }
+    return count
 
+}
 
 function update_index() {
     var count = 0;
+    var count1 = 0;
     let table_data = INDEX.selectAll("tr").data(LINK_DATA, d => d.index);
-    console.log("asdiouashdisahosahdosahuds")
-    console.log(LINK_DATA.length) //21
-    console.log(LINK_DATA[0].source.id)
-    console.log(GRAPH.data)
-    console.log("asdasd")
+    /* console.log("asdiouashdisahosahdosahuds")
+     console.log(LINK_DATA.length) //21
+     console.log( LINK_DATA[0].source.id)
+     console.log(typeof LINK_DATA)
+     console.log(LINK_DATA)
+     console.log("asdasd")*/
+    var tar = new Array()
+    var sor = new Array()
+    var length = LINK_DATA.length
+    var i = 0
+    const countOccurences = (arr, value) => arr.reduce((a, v) => v === value ? a + 1 : a + 0, 0);
+    //change iplus to false , uncomment all replace
+    while (i < length) {
+        var i_plus = false
+        // if(tar.indexOf(LINK_DATA[i].target.id) == -1){
+        tar[count] = LINK_DATA[i].target.id
+        count += 1
+        //}
+
+        // if(sor.indexOf(LINK_DATA[i].source.id) == -1){
+        sor[count1] = LINK_DATA[i].source.id
+        count1 += 1
+        //  }
+
+        //console.log("tar  " + tar + "   current source id  " + LINK_DATA[i].source.id + "   current target id  " + LINK_DATA[i].target.id + "     index  " + i)
+        //if((tar.indexOf(LINK_DATA[i].source.id) !== -1)){
+        if (countOccurences(tar, LINK_DATA[i].source.id) > 1) {
+            LINK_DATA.splice(i, 1)
+            length = length - 1
+        }
+        //else if(tar.indexOf(LINK_DATA[i].target.id) !== -1){
+        /*else */
+        /*else if(sor.indexOf(LINK_DATA[i].target.id) !== -1){
+            console.log("successful2 ")
+            LINK_DATA.splice(i, 1)
+            length = length -1
+        }*/
+        else {
+            //i += 1
+            i_plus = true
+        }
+        if (countOccurences(tar, LINK_DATA[i].target.id) > 1) {
+            console.log("successful2 ")
+            console.log("tar  " + tar + "   current source id  " + LINK_DATA[i].source.id + "   current target id  " + LINK_DATA[i].target.id + "     index  " + i)
+            LINK_DATA.splice(i, 1)
+            length = length - 1
+        }
+        else {
+            //i += 1
+            i_plus = true
+        }
+        if(i_plus==true){
+            i+=1
+        }
+    }
+
+   
     const aaa = []
     let new_trs = table_data.enter().append("tr");
 
@@ -366,11 +429,10 @@ function update_index() {
         .attr("scope", "row")
         //.text(d => d.index + 1); //井号下面的数字1-21
         .datum(d => d.source)
-            //.datum(d => d.source, d => d.target)
+        //.datum(d => d.source, d => d.target)
         .html(d => GRAPH.data[d.id].is_archive ? `${ARCHIVE_IMG} ${d.id}` : d.id);
     for (let field of ["source", "target"]) {
-        console.log("count the num"+count+field)
-        count = count+1
+
         new_trs.append("td")
             .attr("class", "sub_name")
             .datum(d => d[field])
@@ -383,7 +445,7 @@ function update_index() {
     new_trs.append("td")
         .attr("class", "score")
         .text(d => d.value.toFixed(1));//toFixed(1)保留一位小数
-        //.style("border-right", d => d.source.group === undefined ? "" : `10px solid ${COLOR(d.source.group)}`);//重复的分数
+    //.style("border-right", d => d.source.group === undefined ? "" : `10px solid ${COLOR(d.source.group)}`);//重复的分数
 
 
     new_trs
@@ -392,28 +454,29 @@ function update_index() {
                 node.is_node_in_splotlight = node.id === link.source.id || node.id === link.target.id;
                 node.is_node_in_background = node.group !== link.source.group;
             });
-           // update_graph();
+            // update_graph();
         })
         .on("mouseout", link => {
             GRAPH.nodes.forEach(node => {
                 node.is_node_in_splotlight = false;
                 node.is_node_in_background = false;
             })
-           // update_graph();
-       })
-       .on("click", d => window.open(`match_${d.index + 1}.html`));
+            // update_graph();
+        })
+        .on("click", d => window.open(`match_${d.index + 1}.html`));
 
     let group_selected = undefined;
     GRAPH.nodes.forEach(node => group_selected = node.is_group_selected ? node.group : group_selected);
 
     table_data.merge(new_trs)
-              .style("background-color", link => link.source.is_group_focused && !link.source.is_group_selected ? "#ECECEC" : "")
-              .style("display", link => group_selected !== undefined && group_selected !== link.source.group ? "none" : "")
-              .selectAll(".sub_name")
-                .style("background-color", d => d.is_node_focused ? "#CCCCCC" : "")
-                .style("font-weight", d => d.is_node_selected ? "bold" : "");
+        .style("background-color", link => link.source.is_group_focused && !link.source.is_group_selected ? "#ECECEC" : "")
+        .style("display", link => group_selected !== undefined && group_selected !== link.source.group ? "none" : "")
+        .selectAll(".sub_name")
+        .style("background-color", d => d.is_node_focused ? "#CCCCCC" : "")
+        .style("font-weight", d => d.is_node_selected ? "bold" : "");
 
     table_data.exit().remove();
+    console.log("111")
 }
 
 
@@ -425,7 +488,7 @@ function update_graph() {
         .attr("visibility", "hidden")
         .interrupt("foo")
         .transition("foo").delay(280).duration(0)
-            .attr("visibility", "");
+        .attr("visibility", "");
 
     links.exit().remove();
 
@@ -434,32 +497,32 @@ function update_graph() {
     let new_nodes = nodes.enter().append("rect");
 
     nodes.merge(new_nodes)
-        .attr("width", function(d) {let width = d3.select(this).attr("width"); return width ? width : 0;})
-        .attr("height", function(d) {let height = d3.select(this).attr("height"); return height ? height : 0;})
+        .attr("width", function (d) { let width = d3.select(this).attr("width"); return width ? width : 0; })
+        .attr("height", function (d) { let height = d3.select(this).attr("height"); return height ? height : 0; })
         .transition("nodes").duration(280)
-            .attr("width", RADIUS * 2)
-            .attr("height", RADIUS * 2);
+        .attr("width", RADIUS * 2)
+        .attr("height", RADIUS * 2);
 
     new_nodes
         .attr("rx", d => GRAPH.data[d.id].is_archive ? RADIUS * 0.4 : RADIUS)
         .attr("ry", d => GRAPH.data[d.id].is_archive ? RADIUS * 0.4 : RADIUS)
         .call(d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended))
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended))
         .on("click", on_click_node)
         .on("mouseover", on_mouseover_node)
         .on("mouseout", on_mouseout_node)
         .append("title")
-          .text(d => d.id);
+        .text(d => d.id);
 
     nodes.exit()
         .transition("nodes")
-            .delay(0)
-            .duration(100)
-            .attr("width", 0)
-            .attr("height", 0)
-            .remove();
+        .delay(0)
+        .duration(100)
+        .attr("width", 0)
+        .attr("height", 0)
+        .remove();
 
     let group_selected = undefined;
     GRAPH.nodes.forEach(node => group_selected = node.is_group_selected ? node.group : group_selected);
@@ -474,7 +537,7 @@ function update_graph() {
             }
             return "grey";
         })
-        .attr("stroke", function(d) {
+        .attr("stroke", function (d) {
             if (d.is_node_focused || d.is_node_in_splotlight || d.is_node_selected)
                 return "black";
             else if (d.is_group_focused)
@@ -503,7 +566,7 @@ function update_graph() {
 }
 
 
-function jiggle(alpha=0.3, duration=300) {
+function jiggle(alpha = 0.3, duration = 300) {
     SIMULATION.alphaTarget(alpha).restart();
     setTimeout(() => SIMULATION.alphaTarget(0).restart(), duration);
 }
