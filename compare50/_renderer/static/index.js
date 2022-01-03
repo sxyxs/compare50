@@ -408,29 +408,39 @@ function update_index() {
             i += 1
         }
     }
-
-    /*ar objectB = new Object()
-    var count_objb = 0
-    
-    for (j = 0; i < rray.length; j++) {
-        if (single_source.indexOf(rray[j]) !== -1) {
-            for (i = 0; i < length; i++) {
-                if(LINK_DATA[i].source.id==rray[j]){
-                    //objectB[count_objb] = LINK_DATA[i]
-                    objectB = Object.assign(objectB, LINK_DATA[i])
-                    console.log(objectB)
-                    count_objb+=1
-                }
-                
-            }
+    i=0
+    while (i < length) {
+        if(single_source.indexOf(LINK_DATA[i].source.id) == -1){
+            console.log("lol")
+            LINK_DATA.splice(i, 1)
+            length = length - 1
+        }
+        else {
+            //i_plus = true
+            i += 1
         }
     }
-    console.log("aspdhasdhas")
-    console.log(count_objb)*/
-    //LINK_DATA.push(LINK_DATA[0])
-    LINK_DATA.splice(6, 0,LINK_DATA[0])
     // 写一个for loop 从 single source里抓
-    // 
+    // 一个一个的把他们排好顺序
+    var start_index = -1
+    
+    /*for (i = 0; i < single_source.length; i++) 
+    {
+        console.log(single_source[i])
+        start_order = false
+        for (j = 0; j < length; j++) 
+        {
+            if (LINK_DATA[j].source.id == single_source[i]) {//当碰到了第一个和这个分组一样的 source id
+                start_index = j //store the start index
+                start_order = true
+            }
+            if (start_order == true && LINK_DATA[j].source.id == single_source[i]) {
+                start_index += 1
+                LINK_DATA.splice(start_index, 0, LINK_DATA[j])
+                //LINK_DATA.splice(j, 1)
+            }
+        }
+    }*/
     //LINK_DATA.splice(0, 1)
     const aaa = []
     let new_trs = table_data.enter().append("tr");
